@@ -20,19 +20,25 @@ top_3_pickup as (
         td.pulocationid
       , td.dolocationid
       , mpt.max_time
+), trips as (
+  select
+      trips.pulocationid
+    , pzone.zone as pu_zone
+    , trips.dolocationid
+    , dzone.zone as dz_zone
+    , num_trips
+    , max_pu_time
+    , min_pu_time
+  from top_3_pickup trips
+      join taxi_zone pzone
+          on trips.pulocationid = pzone.location_id
+      join taxi_zone dzone
+          on trips.dolocationid = dzone.location_id
+  -- order by 5 desc
 )
-select
-    trips.pulocationid
-  , pzone.zone as pu_zone
-  , trips.dolocationid
-  , dzone.zone as dz_zone
-  , num_trips
-  , max_pu_time
-  , min_pu_time
-from top_3_pickup trips
-    join taxi_zone pzone
-        on trips.pulocationid = pzone.location_id
-    join taxi_zone dzone
-        on trips.dolocationid = dzone.location_id
-order by 5 desc
+select pu_zone, sum(num_trips) qty_trips
+from trips
+group by pu_zone
+order by 2 desc
+limit 3
 ;
